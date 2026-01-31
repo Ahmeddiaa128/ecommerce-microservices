@@ -10,6 +10,7 @@ type CreateAddressRequest struct {
 }
 
 type UpdateAddressRequest struct {
+	Id      int32  `json:"id" validate:"required"`
 	Country string `json:"country" validate:"omitempty"`
 	City    string `json:"city" validate:"omitempty"`
 	State   string `json:"state" validate:"omitempty"`

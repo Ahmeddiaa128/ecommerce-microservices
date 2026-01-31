@@ -16,6 +16,8 @@ type AddressUsecase struct {
 	tracer      trace.Tracer
 }
 
+var _ domain.AddressUsecaseInterface = (*AddressUsecase)(nil)
+
 func NewAddressUsecase(addressRepo domain.AddressRepositoryInterface) domain.AddressUsecaseInterface {
 	return &AddressUsecase{
 		addressRepo: addressRepo,
@@ -57,7 +59,7 @@ func (a *AddressUsecase) CreateAddress(ctx context.Context, req *dto.CreateAddre
 	return int32(address.ID), nil
 }
 
-func (a *AddressUsecase) GetAddressByID(ctx context.Context, addressID int32) (domain.Address, error) {
+func (a *AddressUsecase) GetAddressByID(ctx context.Context, addressID int32) (*dto.AddressResponse, error) {
 	ctx, span := a.tracer.Start(ctx, "AddressUsecase.GetAddressByID")
 	defer span.End()
 
@@ -69,13 +71,23 @@ func (a *AddressUsecase) GetAddressByID(ctx context.Context, addressID int32) (d
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		return domain.Address{}, err
+		return nil, err
 	}
 
-	return address, nil
+	response := dto.AddressResponse{
+		ID:      int32(address.ID),
+		UserID:  int32(address.UserID),
+		Country: address.Country,
+		City:    address.City,
+		State:   address.State,
+		Street:  address.Street,
+		ZipCode: address.ZipCode,
+	}
+
+	return &response, nil
 }
 
-func (a *AddressUsecase) ListAddressesByUserID(ctx context.Context, userID int32) ([]domain.Address, error) {
+func (a *AddressUsecase) ListAddressesByUserID(ctx context.Context, userID int32) ([]dto.AddressResponse, error) {
 	ctx, span := a.tracer.Start(ctx, "AddressUsecase.ListAddressesByUserID")
 	defer span.End()
 
@@ -90,7 +102,20 @@ func (a *AddressUsecase) ListAddressesByUserID(ctx context.Context, userID int32
 		return nil, err
 	}
 
-	return addresses, nil
+	response := make([]dto.AddressResponse, len(addresses))
+	for i, address := range addresses {
+		response[i] = dto.AddressResponse{
+			ID:      int32(address.ID),
+			UserID:  int32(address.UserID),
+			Country: address.Country,
+			City:    address.City,
+			State:   address.State,
+			Street:  address.Street,
+			ZipCode: address.ZipCode,
+		}
+	}
+
+	return response, nil
 }
 
 func (a *AddressUsecase) UpdateAddress(ctx context.Context, req *dto.UpdateAddressRequest) error {
@@ -107,7 +132,7 @@ func (a *AddressUsecase) UpdateAddress(ctx context.Context, req *dto.UpdateAddre
 
 	updateAddressCtx, updateAddressSpan := a.tracer.Start(ctx, "addressRepo.UpdateAddress")
 
-	_, err := a.addressRepo.UpdateAddress(updateAddressCtx, addressToUpdate)
+	_, err := a.addressRepo.UpdateAddress(updateAddressCtx, uint(req.Id), addressToUpdate)
 	if err != nil {
 		updateAddressSpan.RecordError(err)
 		updateAddressSpan.SetStatus(codes.Error, err.Error())

@@ -15,6 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var _ domain.UserRepositoryInterface = (*UserRepository)(nil)
+
 type UserRepository struct {
 	db     *gorm.DB
 	tracer trace.Tracer
@@ -78,8 +80,10 @@ func (r *UserRepository) SearchUsers(ctx context.Context, query string, limit, o
 		Find(ctx)
 	return users, err
 }
-func (r *UserRepository) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
-	rowsAffected, err := gorm.G[domain.User](r.db).Updates(ctx, user)
+func (r *UserRepository) UpdateUser(ctx context.Context, id uint, user domain.User) (domain.User, error) {
+	rowsAffected, err := gorm.G[domain.User](r.db).
+		Where("id = ?", id).
+		Updates(ctx, user)
 	if err != nil {
 		return domain.User{}, err
 	}

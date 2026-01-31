@@ -1,0 +1,38 @@
+name: api-gateway
+services:
+  api-gateway:
+    build:
+      context: ../../..
+      dockerfile: services/ApiGateway/docker/Dockerfile.dev
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../..:/app
+      - /app/tmp
+    environment:
+      - APP_PORT=8080
+      - APP_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - ALLOWED_ORIGINS=*
+      - ALLOWED_METHODS=GET,POST,PUT,PATCH,DELETE,OPTIONS
+      - ALLOWED_HEADERS=Accept,Authorization,Content-Type,X-Request-ID
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW_SECONDS=60
+      - USER_SERVICE_URL=userservice_app:50051
+      - PRODUCT_SERVICE_URL=productservice_app:50053
+      - CART_SERVICE_URL=cartservice_app:50057
+      - ORDER_SERVICE_URL=orderservice_app:50055
+      - REQUEST_TIMEOUT_SECONDS=30
+      - IDLE_TIMEOUT_SECONDS=120
+      - READ_TIMEOUT_SECONDS=15
+      - WRITE_TIMEOUT_SECONDS=15
+      - SERVICE_NAME=api-gateway
+    networks:
+      - ecommerce_default
+    restart: unless-stopped
+    # External services run in separate compose projects
+
+networks:
+  ecommerce_default:
+    external: true

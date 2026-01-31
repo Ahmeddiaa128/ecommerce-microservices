@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var _ domain.AddressRepositoryInterface = (*AddressRepository)(nil)
+
 type AddressRepository struct {
 	db     *gorm.DB
 	tracer trace.Tracer
@@ -61,11 +63,13 @@ func (r *AddressRepository) ListAddressesByUserID(ctx context.Context, userID ui
 }
 
 // UpdateAddress(context.Context, domain.Address) (domain.Address, error)
-func (r *AddressRepository) UpdateAddress(ctx context.Context, address domain.Address) (domain.Address, error) {
+func (r *AddressRepository) UpdateAddress(ctx context.Context, id uint, address domain.Address) (domain.Address, error) {
 	_, span := r.tracer.Start(ctx, "UpdateAddress")
 	defer span.End()
 
-	rowsAffected, err := gorm.G[domain.Address](r.db).Updates(ctx, address)
+	rowsAffected, err := gorm.G[domain.Address](r.db).
+		Where("id = ?", id).
+		Updates(ctx, address)
 	if err != nil {
 		return domain.Address{}, err
 	}

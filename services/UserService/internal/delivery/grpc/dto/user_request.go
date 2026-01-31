@@ -12,6 +12,7 @@ type CreateUserRequest struct {
 }
 
 type UpdateUserRequest struct {
+	Id       uint   ` json:"id" validate:"required"`
 	Name     string ` json:"name" validate:"omitempty,min=2,max=100"`
 	Email    string ` json:"email" validate:"omitempty,email"`
 	Password string ` json:"password" validate:"omitempty,min=6"`

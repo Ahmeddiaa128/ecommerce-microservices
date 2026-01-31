@@ -936,6 +936,7 @@ type UpdateAddressRequest struct {
 	State         string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
 	Street        string                 `protobuf:"bytes,4,opt,name=street,proto3" json:"street,omitempty"`
 	ZipCode       string                 `protobuf:"bytes,5,opt,name=zip_code,json=zipCode,proto3" json:"zip_code,omitempty"`
+	Id            int32                  `protobuf:"varint,6,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1003,6 +1004,13 @@ func (x *UpdateAddressRequest) GetZipCode() string {
 		return x.ZipCode
 	}
 	return ""
+}
+
+func (x *UpdateAddressRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 type UpdateAddressResponse struct {
@@ -1291,13 +1299,14 @@ const file_shared_proto_v1_user_proto_rawDesc = "" +
 	"\x1cListAddressesByUserIDRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x05R\x06userId\"L\n" +
 	"\x1dListAddressesByUserIDResponse\x12+\n" +
-	"\taddresses\x18\x01 \x03(\v2\r.user.AddressR\taddresses\"\x8d\x01\n" +
+	"\taddresses\x18\x01 \x03(\v2\r.user.AddressR\taddresses\"\x9d\x01\n" +
 	"\x14UpdateAddressRequest\x12\x18\n" +
 	"\acountry\x18\x01 \x01(\tR\acountry\x12\x12\n" +
 	"\x04city\x18\x02 \x01(\tR\x04city\x12\x14\n" +
 	"\x05state\x18\x03 \x01(\tR\x05state\x12\x16\n" +
 	"\x06street\x18\x04 \x01(\tR\x06street\x12\x19\n" +
-	"\bzip_code\x18\x05 \x01(\tR\azipCode\"@\n" +
+	"\bzip_code\x18\x05 \x01(\tR\azipCode\x12\x0e\n" +
+	"\x02id\x18\x06 \x01(\x05R\x02id\"@\n" +
 	"\x15UpdateAddressResponse\x12'\n" +
 	"\aaddress\x18\x01 \x01(\v2\r.user.AddressR\aaddress\"&\n" +
 	"\x14DeleteAddressRequest\x12\x0e\n" +

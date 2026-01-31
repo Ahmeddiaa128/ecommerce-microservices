@@ -1,0 +1,426 @@
+{
+  "info": {
+    "name": "Ecommerce API Gateway",
+    "description": "Ready-to-use collection for the Ecommerce API Gateway (Gin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "userId", "value": "1" },
+    { "key": "productId", "value": "1" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "addressId", "value": "1" },
+    { "key": "orderId", "value": "1" },
+    { "key": "orderItemId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\",\n  \"role\": \"customer\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/users/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/users/login"
+          }
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/users/profile"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/users/update"
+          }
+        },
+        {
+          "name": "Search Users (admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/users/search?query=&page=1&per_page=10"
+          }
+        },
+        {
+          "name": "Get User By ID (admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/users/by-id?id={{userId}}"
+          }
+        },
+        {
+          "name": "Delete User (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/users/delete?id={{userId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Addresses",
+      "item": [
+        {
+          "name": "Create Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country\": \"US\",\n  \"city\": \"NYC\",\n  \"state\": \"NY\",\n  \"street\": \"5th Avenue\",\n  \"zip_code\": \"10001\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/addresses/create"
+          }
+        },
+        {
+          "name": "List Addresses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/addresses/list"
+          }
+        },
+        {
+          "name": "Update Address",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"country\": \"US\",\n  \"city\": \"NYC\",\n  \"state\": \"NY\",\n  \"street\": \"Madison Ave\",\n  \"zip_code\": \"10010\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/addresses/update"
+          }
+        },
+        {
+          "name": "Delete Address",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/addresses/delete?id={{addressId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/products?page=1&per_page=10"
+          }
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/products/by-id?id={{productId}}"
+          }
+        },
+        {
+          "name": "Create Product (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Product\",\n  \"short_description\": \"Short description\",\n  \"description\": \"Long description\",\n  \"price\": 99.99,\n  \"discount_type\": 0,\n  \"discount_value\": 0,\n  \"image_url\": \"https://example.com/image.png\",\n  \"quantity\": 10\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/products/create"
+          }
+        },
+        {
+          "name": "Update Product (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{productId}},\n  \"name\": \"Updated Product\",\n  \"short_description\": \"Short description\",\n  \"description\": \"Long description\",\n  \"price\": 89.99,\n  \"discount_type\": 0,\n  \"discount_value\": 0,\n  \"image_url\": \"https://example.com/image.png\",\n  \"quantity\": 10\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/products/update"
+          }
+        },
+        {
+          "name": "Delete Product (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/products/delete?id={{productId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/categories?page=1&per_page=10"
+          }
+        },
+        {
+          "name": "Get Category By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/categories/by-id?id={{categoryId}}"
+          }
+        },
+        {
+          "name": "Create Category (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Category Name\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/categories/create"
+          }
+        },
+        {
+          "name": "Update Category (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{categoryId}},\n  \"name\": \"Updated Category\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/categories/update"
+          }
+        },
+        {
+          "name": "Delete Category (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/categories/delete?id={{categoryId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/cart"
+          }
+        },
+        {
+          "name": "Add Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{productId}},\n  \"quantity\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/cart/items/add"
+          }
+        },
+        {
+          "name": "Update Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{productId}},\n  \"quantity\": 3\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/cart/items/update"
+          }
+        },
+        {
+          "name": "Remove Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{productId}}\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/cart/items/remove"
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/cart/clear"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipping_cost\": 5.5,\n  \"shipping_duration_days\": 3,\n  \"discount\": 0,\n  \"items\": [\n    {\n      \"product_id\": {{productId}},\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/orders/create"
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/orders?page=1&per_page=10"
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/v1/orders/by-id?id={{orderId}}"
+          }
+        },
+        {
+          "name": "Add Order Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": {{orderId}},\n  \"product_id\": {{productId}},\n  \"quantity\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/orders/items/add"
+          }
+        },
+        {
+          "name": "Remove Order Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": {{orderId}},\n  \"item_id\": {{orderItemId}}\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/orders/items/remove"
+          }
+        },
+        {
+          "name": "Update Order Status (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": {{orderId}},\n  \"status\": \"processing\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/orders/status"
+          }
+        }
+      ]
+    }
+  ]
+}

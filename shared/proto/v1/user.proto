@@ -126,6 +126,7 @@ message UpdateAddressRequest {
   string state    = 3;
   string street   = 4;
   string zip_code = 5;
+  int32  id       = 6;
 }
 
 message UpdateAddressResponse {

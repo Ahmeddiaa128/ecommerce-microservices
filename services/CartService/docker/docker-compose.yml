@@ -14,14 +14,16 @@ services:
     depends_on:
       - redis
     networks:
-      - cart_service_network
-      - ecommerce_default
+      cart_service_network:
+      ecommerce_default:
+        aliases:
+          - cartservice_app
   redis:
     image: redis:7-alpine
     ports:
       - "6381:6379"
     networks:
-      - cart_service_network
+      cart_service_network:
 
 volumes:
   redis_data:

@@ -187,6 +187,7 @@ func (h *UserGRPCHandler) UpdateUser(ctx context.Context, in *pb.UpdateUserReque
 	defer span.End()
 
 	updateUserRequest := dto.UpdateUserRequest{
+		Id:       uint(in.GetId()),
 		Name:     in.GetName(),
 		Email:    in.GetEmail(),
 		Password: in.GetPassword(),
@@ -282,7 +283,7 @@ func (h *UserGRPCHandler) GetAddressByID(ctx context.Context, in *pb.GetAddressB
 
 	getAddressCtx, getAddressSpan := h.tracer.Start(ctx, "Usecase GetAddressByID")
 
-	_, err := h.addressUsecase.GetAddressByID(getAddressCtx, addressId)
+	address, err := h.addressUsecase.GetAddressByID(getAddressCtx, addressId)
 	if err != nil {
 		getAddressSpan.RecordError(err)
 		getAddressSpan.SetStatus(codes.Error, err.Error())
@@ -291,7 +292,18 @@ func (h *UserGRPCHandler) GetAddressByID(ctx context.Context, in *pb.GetAddressB
 	}
 	getAddressSpan.End()
 
-	return &pb.GetAddressByIDResponse{}, nil
+	response := &pb.Address{
+		Id:      address.ID,
+		UserId:  address.UserID,
+		Country: address.Country,
+		City:    address.City,
+		State:   address.State,
+		Street:  address.Street,
+		ZipCode: address.ZipCode,
+	}
+
+	return &pb.GetAddressByIDResponse{Address: response}, nil
+
 }
 func (h *UserGRPCHandler) ListAddressesByUserID(ctx context.Context, in *pb.ListAddressesByUserIDRequest) (*pb.ListAddressesByUserIDResponse, error) {
 
@@ -302,7 +314,7 @@ func (h *UserGRPCHandler) ListAddressesByUserID(ctx context.Context, in *pb.List
 
 	listAddressesCtx, listAddressesSpan := h.tracer.Start(ctx, "Usecase ListAddressesByUserID")
 
-	_, err := h.addressUsecase.ListAddressesByUserID(listAddressesCtx, userId)
+	addresses, err := h.addressUsecase.ListAddressesByUserID(listAddressesCtx, userId)
 	if err != nil {
 		listAddressesSpan.RecordError(err)
 		listAddressesSpan.SetStatus(codes.Error, err.Error())
@@ -311,7 +323,20 @@ func (h *UserGRPCHandler) ListAddressesByUserID(ctx context.Context, in *pb.List
 	}
 	listAddressesSpan.End()
 
-	return &pb.ListAddressesByUserIDResponse{}, nil
+	response := make([]*pb.Address, len(addresses))
+	for i, address := range addresses {
+		response[i] = &pb.Address{
+			Id:      address.ID,
+			UserId:  address.UserID,
+			Country: address.Country,
+			City:    address.City,
+			State:   address.State,
+			Street:  address.Street,
+			ZipCode: address.ZipCode,
+		}
+	}
+
+	return &pb.ListAddressesByUserIDResponse{Addresses: response}, nil
 }
 func (h *UserGRPCHandler) UpdateAddress(ctx context.Context, in *pb.UpdateAddressRequest) (*pb.UpdateAddressResponse, error) {
 
@@ -321,6 +346,7 @@ func (h *UserGRPCHandler) UpdateAddress(ctx context.Context, in *pb.UpdateAddres
 	_, validateAddressSpan := h.tracer.Start(ctx, "Validate UpdateAddressRequest")
 
 	updateAddressRequest := dto.UpdateAddressRequest{
+		Id:      in.GetId(),
 		Country: in.GetCountry(),
 		City:    in.GetCity(),
 		State:   in.GetState(),

@@ -51,7 +51,7 @@ func (u *UserUsecase) Login(ctx context.Context, email, passwords string) (*dto.
 
 	_, validatePasswordSpan := u.tracer.Start(ctx, "password.Verify")
 
-	valid := password.Verify(passwords, user.Password)
+	valid := password.Verify(user.Password, passwords)
 	if !valid {
 		err := domain.ErrInvalidCredentials
 		validatePasswordSpan.RecordError(err)
@@ -64,7 +64,12 @@ func (u *UserUsecase) Login(ctx context.Context, email, passwords string) (*dto.
 	}
 	validatePasswordSpan.End()
 
-	return nil, nil
+	return &dto.UserResponse{
+		ID:    user.ID,
+		Email: user.Email,
+		Name:  user.Name,
+		Role:  string(user.Role),
+	}, nil
 }
 
 func (u *UserUsecase) CreateUser(ctx context.Context, req *dto.CreateUserRequest) (*dto.UserResponse, error) {
@@ -265,7 +270,7 @@ func (u *UserUsecase) UpdateUser(ctx context.Context, req *dto.UpdateUserRequest
 
 	updateUserCtx, updateUserSpan := u.tracer.Start(ctx, "userRepo.UpdateUser")
 
-	user, err := u.userRepo.UpdateUser(updateUserCtx, userToUpdate)
+	user, err := u.userRepo.UpdateUser(updateUserCtx, req.Id, userToUpdate)
 	if err != nil {
 		updateUserSpan.RecordError(err)
 		updateUserSpan.SetStatus(codes.Error, err.Error())

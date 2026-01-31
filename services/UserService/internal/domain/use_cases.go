@@ -8,8 +8,8 @@ import (
 
 type AddressUsecaseInterface interface {
 	CreateAddress(ctx context.Context, req *dto.CreateAddressRequest) (int32, error)
-	GetAddressByID(ctx context.Context, addressID int32) (Address, error)
-	ListAddressesByUserID(ctx context.Context, userID int32) ([]Address, error)
+	GetAddressByID(ctx context.Context, addressID int32) (*dto.AddressResponse, error)
+	ListAddressesByUserID(ctx context.Context, userID int32) ([]dto.AddressResponse, error)
 	UpdateAddress(ctx context.Context, req *dto.UpdateAddressRequest) error
 	DeleteAddress(ctx context.Context, addressID int32) error
 }

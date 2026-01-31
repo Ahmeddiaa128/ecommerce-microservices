@@ -15,8 +15,10 @@ services:
     depends_on:
       - db
     networks:
-      - order_service_network
-      - ecommerce_default
+      order_service_network:
+      ecommerce_default:
+        aliases:
+          - orderservice_app
   db:
     image: postgres:16-alpine
     environment:
@@ -33,7 +35,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - order_service_network
+      order_service_network:
 
 volumes:
   db_data:
