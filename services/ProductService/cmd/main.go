@@ -27,6 +27,8 @@ func main() {
 		panic(err)
 	}
 
+	logger.InitGlobal(config.AppEnv, "logs/product/system.log")
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -46,6 +48,7 @@ func main() {
 	db, err := db.InitDB(dbConfig)
 	if err != nil {
 		close(done)
+		logger.Errorf("failed to connect to database: %v", err)
 		panic("failed to connect database")
 	}
 
@@ -67,7 +70,7 @@ func main() {
 
 	validate := validator.New()
 
-	grpcHandler := handler.NewProductGRPCHandler(productUseCase, categoryUseCase, validate)
+	grpcHandler := handler.NewProductGRPCHandler(productUseCase, categoryUseCase, validate, config.InternalAuthToken)
 
 	err = grpcHandler.Run(done, config.GRPCPort)
 	if err != nil {

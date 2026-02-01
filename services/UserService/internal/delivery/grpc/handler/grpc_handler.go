@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kareemhamed001/e-commerce/pkg/grpcmiddleware"
 	"github.com/kareemhamed001/e-commerce/pkg/jwt"
 	"github.com/kareemhamed001/e-commerce/pkg/logger"
 	"github.com/kareemhamed001/e-commerce/services/UserService/internal/delivery/grpc/dto"
@@ -23,15 +24,17 @@ type UserGRPCHandler struct {
 	validate       *validator.Validate
 	jwtManager     *jwt.JWTManager
 	tracer         trace.Tracer
+	internalAuthToken string
 }
 
-func NewUserGRPCHandler(userUsecase domain.UserUsecaseInterface, addressUsecase domain.AddressUsecaseInterface, validate *validator.Validate, jwtManager *jwt.JWTManager) *UserGRPCHandler {
+func NewUserGRPCHandler(userUsecase domain.UserUsecaseInterface, addressUsecase domain.AddressUsecaseInterface, validate *validator.Validate, jwtManager *jwt.JWTManager, internalAuthToken string) *UserGRPCHandler {
 	return &UserGRPCHandler{
 		userUsecase:    userUsecase,
 		addressUsecase: addressUsecase,
 		validate:       validate,
 		jwtManager:     jwtManager,
 		tracer:         otel.Tracer("user_GRPC_handler"),
+		internalAuthToken: internalAuthToken,
 	}
 }
 
@@ -404,7 +407,7 @@ func (h *UserGRPCHandler) Run(done <-chan any, port string) error {
 		return err
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(grpcmiddleware.InternalAuthUnaryServerInterceptor(h.internalAuthToken)))
 	pb.RegisterUserServiceServer(grpcServer, h)
 
 	go func() {

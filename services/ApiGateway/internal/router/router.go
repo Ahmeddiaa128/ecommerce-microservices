@@ -122,6 +122,7 @@ func (r *Router) setupMiddleware() {
 	r.engine.Use(middleware.Recovery())
 	r.engine.Use(middleware.RequestID())
 	r.engine.Use(middleware.Logger())
+	r.engine.Use(middleware.Cancellation())
 	r.engine.Use(middleware.Timeout(r.cfg.RequestTimeout))
 	r.engine.Use(middleware.NewRateLimiter(r.cfg.RateLimitRequests, r.cfg.RateLimitWindow).Middleware())
 }

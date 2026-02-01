@@ -32,6 +32,9 @@ type Config struct {
 
 	// Service name
 	ServiceName string
+
+	// Internal service auth
+	InternalAuthToken string
 }
 
 func Load() (*Config, error) {
@@ -77,6 +80,9 @@ func Load() (*Config, error) {
 
 		// Service
 		ServiceName: GetEnv("SERVICE_NAME", "user-service"),
+
+		// Internal service auth
+		InternalAuthToken: GetEnv("INTERNAL_AUTH_TOKEN", ""),
 	}
 
 	if err := cfg.Validate(); err != nil {
@@ -101,6 +107,10 @@ func (c *Config) Validate() error {
 
 	if c.AppPort == "" {
 		return fmt.Errorf("APP_PORT is required")
+	}
+
+	if c.InternalAuthToken == "" {
+		return fmt.Errorf("INTERNAL_AUTH_TOKEN is required")
 	}
 
 	return nil

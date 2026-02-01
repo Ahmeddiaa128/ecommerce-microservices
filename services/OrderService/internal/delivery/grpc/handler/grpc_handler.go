@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kareemhamed001/e-commerce/pkg/grpcmiddleware"
 	"github.com/kareemhamed001/e-commerce/pkg/logger"
 	"github.com/kareemhamed001/e-commerce/services/OrderService/internal/delivery/grpc/dto"
 	"github.com/kareemhamed001/e-commerce/services/OrderService/internal/domain"
@@ -22,15 +23,17 @@ type OrderGRPCHandler struct {
 	orderUsecase domain.OrderUsecase
 	validate     *validator.Validate
 	tracer       trace.Tracer
+	internalAuthToken string
 }
 
 var _ orderpb.OrderServiceServer = (*OrderGRPCHandler)(nil)
 
-func NewOrderGRPCHandler(orderUsecase domain.OrderUsecase, validate *validator.Validate) *OrderGRPCHandler {
+func NewOrderGRPCHandler(orderUsecase domain.OrderUsecase, validate *validator.Validate, internalAuthToken string) *OrderGRPCHandler {
 	return &OrderGRPCHandler{
 		orderUsecase: orderUsecase,
 		validate:     validate,
 		tracer:       otel.Tracer("order_GRPC_handler"),
+		internalAuthToken: internalAuthToken,
 	}
 }
 
@@ -194,7 +197,7 @@ func (h *OrderGRPCHandler) Run(done <-chan any, port string) error {
 		return err
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(grpcmiddleware.InternalAuthUnaryServerInterceptor(h.internalAuthToken)))
 	orderpb.RegisterOrderServiceServer(grpcServer, h)
 
 	go func() {

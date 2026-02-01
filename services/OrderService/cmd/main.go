@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kareemhamed001/e-commerce/pkg/db"
+	"github.com/kareemhamed001/e-commerce/pkg/grpcmiddleware"
 	"github.com/kareemhamed001/e-commerce/pkg/logger"
 	"github.com/kareemhamed001/e-commerce/pkg/tracer"
 	"github.com/kareemhamed001/e-commerce/services/OrderService/config"
@@ -29,6 +30,8 @@ func main() {
 		close(done)
 		panic(err)
 	}
+
+	logger.InitGlobal(config.AppEnv, "logs/order/system.log")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -54,7 +57,11 @@ func main() {
 
 	orderDB.AutoMigrate(&domain.Order{}, &domain.OrderItem{})
 
-	productConn, err := grpc.NewClient(config.ProductServiceGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	productConn, err := grpc.NewClient(
+		config.ProductServiceGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(grpcmiddleware.InternalAuthUnaryClientInterceptor(config.InternalAuthToken)),
+	)
 	if err != nil {
 		close(done)
 		panic("failed to connect to product service")
@@ -63,7 +70,11 @@ func main() {
 		_ = productConn.Close()
 	}()
 
-	userConn, err := grpc.Dial(config.UserServiceGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userConn, err := grpc.Dial(
+		config.UserServiceGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(grpcmiddleware.InternalAuthUnaryClientInterceptor(config.InternalAuthToken)),
+	)
 	if err != nil {
 		close(done)
 		panic("failed to connect to user service")
@@ -78,7 +89,7 @@ func main() {
 	orderUsecase := usecase.NewOrderUsecase(orderRepo, productClient, userClient)
 
 	validate := validator.New()
-	grpcHandler := handler.NewOrderGRPCHandler(orderUsecase, validate)
+	grpcHandler := handler.NewOrderGRPCHandler(orderUsecase, validate, config.InternalAuthToken)
 
 	if err := grpcHandler.Run(done, config.GRPCPort); err != nil {
 		logger.Errorf("failed to start gRPC server: %v", err)

@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kareemhamed001/e-commerce/pkg/grpcmiddleware"
 	"github.com/kareemhamed001/e-commerce/pkg/logger"
 	"github.com/kareemhamed001/e-commerce/services/ProductService/internal/delivery/grpc/dto"
 	"github.com/kareemhamed001/e-commerce/services/ProductService/internal/domain"
@@ -22,16 +23,18 @@ type ProductGRPCHandler struct {
 	categoryUsecase domain.CategoryUsecase
 	validate        *validator.Validate
 	tracer          trace.Tracer
+	internalAuthToken string
 }
 
 var _ pb.ProductServiceServer = (*ProductGRPCHandler)(nil)
 
-func NewProductGRPCHandler(productUsecase domain.ProductUsecase, categoryUsecase domain.CategoryUsecase, validate *validator.Validate) *ProductGRPCHandler {
+func NewProductGRPCHandler(productUsecase domain.ProductUsecase, categoryUsecase domain.CategoryUsecase, validate *validator.Validate, internalAuthToken string) *ProductGRPCHandler {
 	return &ProductGRPCHandler{
 		productUsecase:  productUsecase,
 		categoryUsecase: categoryUsecase,
 		validate:        validate,
 		tracer:          otel.Tracer("product_GRPC_handler"),
+		internalAuthToken: internalAuthToken,
 	}
 }
 
@@ -489,7 +492,7 @@ func (h *ProductGRPCHandler) Run(done <-chan any, port string) error {
 		logger.Errorf("Error while starting product grpc server: %v", err)
 		return err
 	}
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(grpcmiddleware.InternalAuthUnaryServerInterceptor(h.internalAuthToken)))
 	pb.RegisterProductServiceServer(grpcServer, h)
 
 	go func() {

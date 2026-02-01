@@ -18,13 +18,13 @@ var (
 	once         sync.Once
 )
 
-func new(env string) *logger {
+func new(env, path string) *logger {
 
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   "logs/system.log",
+		Filename:   path,
 		MaxSize:    5,
 		MaxBackups: 10,
 		MaxAge:     15,
@@ -49,9 +49,9 @@ func new(env string) *logger {
 	return &logger{base.Sugar()}
 }
 
-func InitGlobal(env string) *logger {
+func InitGlobal(env string, path string) *logger {
 	once.Do(func() {
-		globalLogger = new(env)
+		globalLogger = new(env, path)
 	})
 	return globalLogger
 }
@@ -59,7 +59,7 @@ func InitGlobal(env string) *logger {
 func Get() *logger {
 
 	if globalLogger == nil {
-		InitGlobal(os.Getenv("APP_ENV"))
+		InitGlobal(os.Getenv("APP_ENV"), "logs/system.log")
 	}
 	return globalLogger
 }

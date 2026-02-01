@@ -1,10 +1,9 @@
 package clients
 
 import (
-	"context"
 	"fmt"
-	"time"
 
+	"github.com/kareemhamed001/e-commerce/pkg/grpcmiddleware"
 	"github.com/kareemhamed001/e-commerce/pkg/logger"
 	cartpb "github.com/kareemhamed001/e-commerce/shared/proto/v1/cart"
 	orderpb "github.com/kareemhamed001/e-commerce/shared/proto/v1/order"
@@ -28,14 +27,15 @@ func NewServiceClients(
 	userServiceURL,
 	productServiceURL,
 	cartServiceURL,
-	orderServiceURL string,
+	orderServiceURL,
+	internalAuthToken string,
 ) (*ServiceClients, error) {
 	clients := &ServiceClients{
 		conns: make([]*grpc.ClientConn, 0),
 	}
 
 	// Connect to User Service
-	userConn, err := createGRPCConnection(userServiceURL)
+	userConn, err := createGRPCConnection(userServiceURL, internalAuthToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to user service: %w", err)
 	}
@@ -44,9 +44,8 @@ func NewServiceClients(
 	logger.Infof("Connected to User Service at %s", userServiceURL)
 
 	// Connect to Product Service
-	productConn, err := createGRPCConnection(productServiceURL)
+	productConn, err := createGRPCConnection(productServiceURL, internalAuthToken)
 	if err != nil {
-		clients.Close()
 		return nil, fmt.Errorf("failed to connect to product service: %w", err)
 	}
 	clients.ProductClient = productpb.NewProductServiceClient(productConn)
@@ -54,9 +53,8 @@ func NewServiceClients(
 	logger.Infof("Connected to Product Service at %s", productServiceURL)
 
 	// Connect to Cart Service
-	cartConn, err := createGRPCConnection(cartServiceURL)
+	cartConn, err := createGRPCConnection(cartServiceURL, internalAuthToken)
 	if err != nil {
-		clients.Close()
 		return nil, fmt.Errorf("failed to connect to cart service: %w", err)
 	}
 	clients.CartClient = cartpb.NewCartServiceClient(cartConn)
@@ -64,9 +62,8 @@ func NewServiceClients(
 	logger.Infof("Connected to Cart Service at %s", cartServiceURL)
 
 	// Connect to Order Service
-	orderConn, err := createGRPCConnection(orderServiceURL)
+	orderConn, err := createGRPCConnection(orderServiceURL, internalAuthToken)
 	if err != nil {
-		clients.Close()
 		return nil, fmt.Errorf("failed to connect to order service: %w", err)
 	}
 	clients.OrderClient = orderpb.NewOrderServiceClient(orderConn)
@@ -77,20 +74,17 @@ func NewServiceClients(
 }
 
 // createGRPCConnection creates a new gRPC connection with retry logic
-func createGRPCConnection(target string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
+func createGRPCConnection(target, internalAuthToken string) (*grpc.ClientConn, error) {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
+		grpc.WithUnaryInterceptor(grpcmiddleware.InternalAuthUnaryClientInterceptor(internalAuthToken)),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(10*1024*1024), // 10MB
 			grpc.MaxCallSendMsgSize(10*1024*1024), // 10MB
 		),
 	}
 
-	conn, err := grpc.DialContext(ctx, target, opts...)
+	conn, err := grpc.NewClient(target, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial %s: %w", target, err)
 	}

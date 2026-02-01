@@ -5,12 +5,11 @@ services:
     build:
       context: ../../..
       dockerfile: ./services/CartService/docker/Dockerfile.dev
-    ports:
-      - "8086:8080"
-      - "50057:50057"
     volumes:
       - ../../..:/app
       - /app/tmp
+    environment:
+      - INTERNAL_AUTH_TOKEN=${INTERNAL_AUTH_TOKEN:-dev-internal-token}
     depends_on:
       - redis
     networks:
@@ -20,8 +19,6 @@ services:
           - cartservice_app
   redis:
     image: redis:7-alpine
-    ports:
-      - "6381:6379"
     networks:
       cart_service_network:
 

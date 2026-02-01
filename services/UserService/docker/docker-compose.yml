@@ -5,13 +5,11 @@ services:
     build:
       context: ../../..
       dockerfile: ./services/UserService/docker/Dockerfile.dev
-    ports:
-      - "8082:8080"
-      - "50051:50051"
-
     volumes:
       - ../../..:/app
       - /app/tmp
+    environment:
+      - INTERNAL_AUTH_TOKEN=${INTERNAL_AUTH_TOKEN:-dev-internal-token}
     depends_on:
       - db
     networks:
@@ -25,8 +23,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ecommerce
-    ports:
-      - "5439:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:

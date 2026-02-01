@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kareemhamed001/e-commerce/pkg/grpcmiddleware"
 	"github.com/kareemhamed001/e-commerce/pkg/logger"
 	redisClient "github.com/kareemhamed001/e-commerce/pkg/redis"
 	"github.com/kareemhamed001/e-commerce/pkg/tracer"
@@ -28,6 +29,7 @@ func main() {
 		close(done)
 		panic(err)
 	}
+	logger.InitGlobal(config.AppEnv, "logs/cart/system.log")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -49,7 +51,11 @@ func main() {
 		panic("failed to connect to redis")
 	}
 
-	productConn, err := grpc.Dial(config.ProductServiceGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	productConn, err := grpc.Dial(
+		config.ProductServiceGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(grpcmiddleware.InternalAuthUnaryClientInterceptor(config.InternalAuthToken)),
+	)
 	if err != nil {
 		close(done)
 		panic("failed to connect to product service")
@@ -58,7 +64,11 @@ func main() {
 		_ = productConn.Close()
 	}()
 
-	userConn, err := grpc.Dial(config.UserServiceGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userConn, err := grpc.Dial(
+		config.UserServiceGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(grpcmiddleware.InternalAuthUnaryClientInterceptor(config.InternalAuthToken)),
+	)
 	if err != nil {
 		close(done)
 		panic("failed to connect to user service")
@@ -74,7 +84,7 @@ func main() {
 	cartUsecase := usecase.NewCartUsecase(cartRepo, productClient, userClient, config.DownstreamTimeout)
 
 	validate := validator.New()
-	grpcHandler := handler.NewCartGRPCHandler(cartUsecase, validate)
+	grpcHandler := handler.NewCartGRPCHandler(cartUsecase, validate, config.InternalAuthToken)
 
 	if err := grpcHandler.Run(done, config.GRPCPort); err != nil {
 		logger.Errorf("failed to start gRPC server: %v", err)

@@ -27,6 +27,8 @@ func main() {
 		panic(err)
 	}
 
+	logger.InitGlobal(config.AppEnv, "logs/user/system.log")
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -59,7 +61,7 @@ func main() {
 	validate := validator.New()
 	jwtManager := jwt.NewJWTManager(config.JWTSecret, time.Duration(config.JWTDuration)*time.Hour)
 
-	grpcHandler := handler.NewUserGRPCHandler(userUseCase, addressUsecase, validate, jwtManager)
+	grpcHandler := handler.NewUserGRPCHandler(userUseCase, addressUsecase, validate, jwtManager, config.InternalAuthToken)
 
 	err = grpcHandler.Run(done, config.GRPCPort)
 	if err != nil {

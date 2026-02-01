@@ -41,6 +41,9 @@ type Config struct {
 
 	// Service name
 	ServiceName string
+
+	// Internal service auth
+	InternalAuthToken string
 }
 
 func Load() (*Config, error) {
@@ -95,6 +98,13 @@ func Load() (*Config, error) {
 
 		// Service
 		ServiceName: GetEnv("SERVICE_NAME", "api-gateway"),
+
+		// Internal service auth
+		InternalAuthToken: GetEnv("INTERNAL_AUTH_TOKEN", ""),
+	}
+
+	if cfg.InternalAuthToken == "" {
+		return nil, fmt.Errorf("INTERNAL_AUTH_TOKEN is required")
 	}
 
 	return cfg, nil

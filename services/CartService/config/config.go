@@ -32,6 +32,9 @@ type Config struct {
 	// Service name
 	ServiceName string
 
+	// Internal service auth
+	InternalAuthToken string
+
 	// Timeouts
 	DownstreamTimeout time.Duration
 }
@@ -73,6 +76,8 @@ func Load() (*Config, error) {
 
 		ServiceName:       GetEnv("SERVICE_NAME", "cart-service"),
 		DownstreamTimeout: time.Duration(getEnvInt("DOWNSTREAM_TIMEOUT_SECONDS", 3)) * time.Second,
+
+		InternalAuthToken: GetEnv("INTERNAL_AUTH_TOKEN", ""),
 	}
 
 	if err := cfg.Validate(); err != nil {
@@ -101,6 +106,10 @@ func (c *Config) Validate() error {
 
 	if c.RedisHost == "" || c.RedisPort == "" {
 		return fmt.Errorf("REDIS_HOST and REDIS_PORT are required")
+	}
+
+	if c.InternalAuthToken == "" {
+		return fmt.Errorf("INTERNAL_AUTH_TOKEN is required")
 	}
 
 	return nil

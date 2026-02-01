@@ -5,13 +5,11 @@ services:
     build:
       context: ../../..
       dockerfile: ./services/ProductService/docker/Dockerfile.dev
-    ports:
-      - "8084:8080"
-      - "50053:50053"
-
     volumes:
       - ../../..:/app
       - /app/tmp
+    environment:
+      - INTERNAL_AUTH_TOKEN=${INTERNAL_AUTH_TOKEN:-dev-internal-token}
     depends_on:
       db:
         condition: service_healthy
@@ -27,8 +25,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: products
-    ports:
-      - "5441:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:

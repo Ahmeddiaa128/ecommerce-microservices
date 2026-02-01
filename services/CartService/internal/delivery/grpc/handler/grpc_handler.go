@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kareemhamed001/e-commerce/pkg/grpcmiddleware"
 	"github.com/kareemhamed001/e-commerce/pkg/logger"
 	"github.com/kareemhamed001/e-commerce/services/CartService/internal/delivery/grpc/dto"
 	"github.com/kareemhamed001/e-commerce/services/CartService/internal/domain"
@@ -20,15 +21,17 @@ type CartGRPCHandler struct {
 	usecase  domain.CartUsecase
 	validate *validator.Validate
 	tracer   trace.Tracer
+	internalAuthToken string
 }
 
 var _ cartpb.CartServiceServer = (*CartGRPCHandler)(nil)
 
-func NewCartGRPCHandler(usecase domain.CartUsecase, validate *validator.Validate) *CartGRPCHandler {
+func NewCartGRPCHandler(usecase domain.CartUsecase, validate *validator.Validate, internalAuthToken string) *CartGRPCHandler {
 	return &CartGRPCHandler{
 		usecase:  usecase,
 		validate: validate,
 		tracer:   otel.Tracer("cart_GRPC_handler"),
+		internalAuthToken: internalAuthToken,
 	}
 }
 
@@ -144,7 +147,7 @@ func (h *CartGRPCHandler) Run(done <-chan any, port string) error {
 		return err
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(grpcmiddleware.InternalAuthUnaryServerInterceptor(h.internalAuthToken)))
 	cartpb.RegisterCartServiceServer(grpcServer, h)
 
 	go func() {

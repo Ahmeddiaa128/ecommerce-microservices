@@ -33,6 +33,9 @@ type Config struct {
 	// Service name
 	ServiceName string
 
+	// Internal service auth
+	InternalAuthToken string
+
 	RedisEnabled  bool
 	RedisHost     string
 	RedisPort     string
@@ -88,6 +91,9 @@ func Load() (*Config, error) {
 		RedisPort:     GetEnv("REDIS_PORT", "6379"),
 		RedisPassword: GetEnv("REDIS_PASSWORD", ""),
 		RedisDB:       getEnvInt("REDIS_DB", 0),
+
+		// Internal service auth
+		InternalAuthToken: GetEnv("INTERNAL_AUTH_TOKEN", ""),
 	}
 
 	if err := cfg.Validate(); err != nil {
@@ -111,6 +117,10 @@ func (c *Config) Validate() error {
 
 	if c.AppPort == "" {
 		return fmt.Errorf("APP_PORT is required")
+	}
+
+	if c.InternalAuthToken == "" {
+		return fmt.Errorf("INTERNAL_AUTH_TOKEN is required")
 	}
 
 	return nil
