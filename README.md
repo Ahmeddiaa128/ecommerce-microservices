@@ -13,6 +13,7 @@ A Go-based e-commerce platform built as a set of microservices with an API Gatew
 - [Repository Structure](#repository-structure)
 - [Configuration](#configuration)
 - [Local Development](#local-development)
+- [Kubernetes Deployment](#kubernetes-deployment)
 - [Security: Gateway-Only Access](#security-gateway-only-access)
 - [Operational Notes](#operational-notes)
 - [Documentation Index](#documentation-index)
@@ -99,6 +100,10 @@ Refer to each service’s README and config files for environment variables and 
 - Each service includes its own Docker files under its [services/\*/docker](services) folder.
 - Service binaries are defined in [services/\*/cmd](services) and can be run independently.
 
+## Kubernetes Deployment
+
+See [k8s/README.md](k8s/README.md) for production-oriented Kubernetes manifests and run steps.
+
 ## Security: Gateway-Only Access
 
 Production best practice is to combine **network isolation** with **service-to-service authentication**.
@@ -149,6 +154,7 @@ This complements the internal token check and prevents traffic spoofing.
 
 - [AUTHORIZATION_LAYER_GUIDE.md](AUTHORIZATION_LAYER_GUIDE.md)
 - [SERVICES_FLOW.md](SERVICES_FLOW.md)
+- [k8s/README.md](k8s/README.md)
 - API Gateway docs:
   - [services/ApiGateway/README.md](services/ApiGateway/README.md)
   - [services/ApiGateway/API_GATEWAY_GUIDE.md](services/ApiGateway/API_GATEWAY_GUIDE.md)
