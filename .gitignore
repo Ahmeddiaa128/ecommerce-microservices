@@ -37,3 +37,10 @@ dist/
 
 
 /vendor
+
+# SSL certificates & Secrets.yaml
+*.pem
+*.key
+*-secret.yaml
+secrets.yaml
+
