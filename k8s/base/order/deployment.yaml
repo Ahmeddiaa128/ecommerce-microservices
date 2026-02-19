@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice
+  namespace: ecommerce
+  labels:
+    app: orderservice
+    component: backend
+spec:
+  replicas: 2
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: orderservice
+
+  template:
+    metadata:
+      labels:
+        app: orderservice
+        component: backend
+
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+
+      containers:
+        - name: orderservice
+          image: abodiaa/orderservice:prod
+          imagePullPolicy: Always
+
+          ports:
+            - name: grpc
+              containerPort: 50055          
+
+          envFrom:
+            - configMapRef:
+                name: orderservice-config
+            - secretRef:
+                name: orderservice-secret
+
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs        
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+
+          readinessProbe:
+            tcpSocket:
+              port: grpc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+
+          livenessProbe:
+            tcpSocket:
+              port: grpc
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+      volumes:
+        - name: logs
+          emptyDir: {}             

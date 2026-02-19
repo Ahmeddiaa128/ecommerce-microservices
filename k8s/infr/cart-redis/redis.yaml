@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cart
+  namespace: ecommerce
+spec:
+  serviceName: redis-cart
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-cart
+  template:
+    metadata:
+      labels:
+        app: redis-cart
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          args:
+            - "--requirepass"
+            - "$(REDIS_PASSWORD)"
+            - "--maxmemory"
+            - "256mb"
+            - "--maxmemory-policy"
+            - "volatile-lru"
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-cart-secret
+                  key: REDIS_PASSWORD
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
