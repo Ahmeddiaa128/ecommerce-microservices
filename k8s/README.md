@@ -1,77 +1,246 @@
-# Kubernetes Deployment (Production-Oriented)
+# 🚀 Go Microservices E-Commerce Platform  
+### Production-Grade Kubernetes Deployment
 
-This folder contains Kubernetes manifests to run the full platform with gateway-only access and internal service authentication.
+<p align="center">
+  <img src="https://img.shields.io/badge/Go-1.22-blue?style=for-the-badge&logo=go" />
+  <img src="https://img.shields.io/badge/Kubernetes-Production-blue?style=for-the-badge&logo=kubernetes" />
+  <img src="https://img.shields.io/badge/Architecture-Microservices-success?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Communication-gRPC-orange?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Database-PostgreSQL-blue?style=for-the-badge&logo=postgresql" />
+  <img src="https://img.shields.io/badge/Cache-Redis-red?style=for-the-badge&logo=redis" />
+  <img src="https://img.shields.io/badge/Observability-Jaeger-purple?style=for-the-badge" />
+</p>
 
-## What’s Included
+---
 
-- Namespace
-- ConfigMaps and Secrets
-- Deployments and Services for API Gateway and services
-- StatefulSets for PostgreSQL and Redis (for non-managed environments)
-- NetworkPolicies to restrict access
-- Optional Ingress for the API Gateway
+## 📌 Overview
 
-## Prerequisites
+This directory contains the complete Kubernetes manifests for a **Production-Ready Go Microservices E-Commerce System** designed using modern cloud-native architectural principles.
 
-- A Kubernetes cluster (v1.24+)
-- kubectl configured for your cluster
-- A StorageClass for PVCs
-- Container images for each service
+This project demonstrates:
 
-## Build and Push Images
+- API Gateway Pattern
+- gRPC Internal Communication
+- Database per Service Pattern
+- Redis Caching Strategy
+- Horizontal Pod Autoscaling (HPA)
+- NGINX Ingress Controller
+- Distributed Tracing (Jaeger)
+- Infrastructure Separation
+- Environment-based Deployment (Kustomize)
 
-Replace the image references in [app-deployments.yaml](app-deployments.yaml) with your registry and tags.
+---
 
-Example images:
+# 🏗️ System Architecture
 
-- ghcr.io/your-org/ecommerce-api-gateway:latest
-- ghcr.io/your-org/ecommerce-user-service:latest
-- ghcr.io/your-org/ecommerce-product-service:latest
-- ghcr.io/your-org/ecommerce-cart-service:latest
-- ghcr.io/your-org/ecommerce-order-service:latest
+![Architecture Diagram](docs/architecture.png)
 
-## Set Secrets
+---
 
-Edit [secrets.yaml](secrets.yaml) and replace the placeholder values:
+## 🔄 Request Flow
 
-- JWT_SECRET
-- INTERNAL_AUTH_TOKEN
-- POSTGRES_PASSWORD
-- USER_DB_DSN
-- PRODUCT_DB_DSN
-- ORDER_DB_DSN
+1. Client sends HTTPS request  
+2. NGINX Ingress Controller receives traffic  
+3. Traffic routed to API Gateway  
+4. Gateway validates JWT & RBAC  
+5. Request forwarded via gRPC  
+6. Microservice interacts with Database or Redis  
+7. Trace exported to Jaeger  
+8. Response returned to client  
 
-## Deploy
+---
 
-Apply manifests in order:
+# 🧩 Microservices Layer
 
-1. Namespace
-2. Secrets + ConfigMaps
-3. Data stores (Postgres/Redis) if you are not using managed services
-4. Apps + Services
-5. NetworkPolicies
-6. Ingress (optional)
+All services communicate internally using **gRPC**
 
-Recommended commands:
+| Service        | Communication | Storage |
+|---------------|--------------|----------|
+| api-gateway   | REST → gRPC  | Stateless |
+| user          | gRPC         | PostgreSQL |
+| product       | gRPC         | PostgreSQL + Redis (Cache) |
+| cart          | gRPC         | Redis |
+| order         | gRPC         | PostgreSQL |
 
-- kubectl apply -f k8s/namespace.yaml
-- kubectl apply -f k8s/secrets.yaml
-- kubectl apply -f k8s/configmaps.yaml
-- kubectl apply -f k8s/data.yaml
-- kubectl apply -f k8s/app-deployments.yaml
-- kubectl apply -f k8s/app-services.yaml
-- kubectl apply -f k8s/networkpolicies.yaml
-- kubectl apply -f k8s/ingress.yaml
+---
 
-## Verify
+## 🗄 Infrastructure Layer
 
-- kubectl -n ecommerce get pods
-- kubectl -n ecommerce get svc
+### 🔹 Namespace Isolation
+All components are deployed within a dedicated Kubernetes namespace.
 
-## Production Notes
+---
 
-- Prefer managed PostgreSQL and Redis and remove [data.yaml](data.yaml) in that case.
-- Set strong secrets and rotate them regularly.
-- Use a service mesh (Istio/Linkerd) for mTLS between services.
-- Add HPA and PodDisruptionBudgets for critical services.
-- Configure observability (OpenTelemetry/Jaeger) and centralized logging.
+### 🔹 NGINX Ingress Controller
+- SSL Termination
+- Host-based Routing
+- Load Balancing
+- Single External Entry Point
+
+Internal services remain private (ClusterIP).
+
+---
+
+### 🔹 PostgreSQL
+- Dedicated database per service
+- Persistent Volumes (PV)
+- Persistent Volume Claims (PVC)
+- ClusterIP exposure only
+
+Implements **Database per Service Pattern**
+
+---
+
+### 🔹 Redis
+- Product Service: Caching layer (Cache-Aside Pattern)
+- Cart Service: In-memory fast operations
+- Performance optimization layer
+
+---
+
+### 🔹 Observability – Jaeger
+- Distributed Tracing
+- End-to-End Request Monitoring
+- Latency Analysis
+- Debugging Microservices Interactions
+
+---
+
+# 📁 Kubernetes Structure
+
+```
+k8s/
+├── base/
+│   ├── api-gateway/
+│   ├── user/
+│   ├── product/
+│   ├── cart/
+│   └── order/
+│
+├── infr/
+│   ├── namespace.yaml
+│   ├── ingress.yaml
+│   ├── cart-redis/
+│   ├── product-redis/
+│   ├── users-postgres/
+│   ├── products-postgres/
+│   └── orders-postgres/
+│
+└── overlays/
+    ├── dev/
+    └── prod/
+```
+
+---
+
+# 🧩 Application Layer
+
+Each service includes:
+
+- deployment.yaml
+- service.yaml
+- configmap.yaml
+- hpa.yaml
+- secret.yaml
+
+---
+
+# ⚙️ Scalability
+
+Each service uses:
+
+- Horizontal Pod Autoscaler (HPA)
+- CPU-based scaling
+- Stateless microservice design
+
+---
+
+# 🔐 Security
+
+- JWT Authentication (Gateway Level)
+- RBAC Authorization
+- Rate Limiting
+- Circuit Breaker Pattern
+- No direct exposure of internal services
+- Database isolation per service
+
+---
+
+# 🚀 Deployment
+
+### Deploy Namespace
+
+```
+kubectl apply -f infr/namespace.yaml
+```
+
+### Deploy Infrastructure
+
+```
+kubectl apply -f infr/
+```
+
+### Deploy Services
+
+```
+kubectl apply -f base/
+```
+
+---
+
+# 🔍 Verification
+
+```
+kubectl get pods -n <namespace>
+kubectl get svc -n <namespace>
+kubectl get ingress -n <namespace>
+```
+
+---
+
+# 🧠 Architectural Patterns Applied
+
+- Microservices Architecture
+- API Gateway Pattern
+- Database per Service
+- Kubernetes Native Scaling
+- Caching Layer Integration
+- Infrastructure Separation
+- CI/CD Ready Layout
+
+---
+
+# 🛠 Tech Stack
+
+- Go (Gin + gRPC)
+- Kubernetes
+- Docker
+- PostgreSQL
+- Redis
+- NGINX Ingress Controller
+- Kustomize
+
+---
+
+# 📦 CI/CD Ready
+
+```
+overlays/
+├── dev/
+└── prod/
+```
+
+# Environment-based configuration planned for:
+
+- Image Tag Injection
+- Replica adjustments
+- Resource Optimization
+- Production hardening
+- CI/CD Integration
+
+---
+
+## 👨‍💻 Author
+
+Ahmed Diaa Hassan  
+DevOps Engineer | Kubernetes | Cloud | Go Microservices
