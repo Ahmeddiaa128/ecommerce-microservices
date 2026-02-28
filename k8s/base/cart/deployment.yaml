@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartservice
+  namespace: ecommerce
+  labels:
+    app: cartservice
+    component: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: cartservice
+  template:
+    metadata:
+      labels:
+        app: cartservice
+        component: backend
+    spec:
+      containers:
+        - name: cartservice
+          image: abodiaa/cartservice:prod
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50057
+              name: grpc
+          envFrom:
+            - configMapRef:
+                name: cart-config
+            - secretRef:
+                name: cart-secret
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+          readinessProbe:
+            tcpSocket:
+              port: grpc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: grpc
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: false
+

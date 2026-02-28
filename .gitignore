@@ -37,3 +37,47 @@ dist/
 
 
 /vendor
+
+# ==============================
+# SSL certificates
+# ==============================
+*.pem
+*.key
+*.crt
+*.csr
+
+# ==============================
+# Kubernetes Secrets
+# ==============================
+*-secret.yaml
+secrets.yaml
+**/secret.yaml
+
+# ==============================
+# OS / Editor / Temp files
+# ==============================
+*.swp
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Build / Binaries / Packages
+# ==============================
+bin/
+dist/
+node_modules/
+*.exe
+*.out
+
+# ==============================
+# Logs
+# ==============================
+*.log
+
+# ==============================
+# Optional: IDE / Editor folders
+# ==============================
+.vscode/
+.idea/

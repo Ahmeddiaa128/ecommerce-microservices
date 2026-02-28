@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: userservice-config
+  namespace: ecommerce
+  labels:
+    app: userservice  
+
+data:
+  GRPC_PORT: "50051"
+  APP_ENV: "production"
+
+  # Database
+  DB_DRIVER: "postgres"
+  DB_HOST: "users-postgres"      # service name
+  DB_PORT: "5432"
+  DB_MIGRATION_AUTO_RUN: "true"
+
+  # Tracing

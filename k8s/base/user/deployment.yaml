@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice
+  namespace: ecommerce
+  labels:
+    app: userservice
+    component: backend
+
+spec:
+  replicas: 2
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+    
+  selector:
+    matchLabels:
+      app: userservice
+
+  template:
+    metadata:
+      labels:
+        app: userservice
+        component: backend
+
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+
+      containers:
+        - name: userservice
+          image: abodiaa/userservice:prod
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 50051
+              name: grpc
+
+          envFrom:
+            - configMapRef:
+                name: userservice-config
+            - secretRef:
+                name: userservice-secret
+            - secretRef:
+                name: users-postgres-secret   # DB credentials
+
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs       
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+
+          readinessProbe:
+            tcpSocket:
+              port: grpc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+
+          livenessProbe:
+            tcpSocket:
+              port: grpc
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+      volumes:           
+        - name: logs
+          emptyDir: {}
