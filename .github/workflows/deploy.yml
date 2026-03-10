@@ -8,6 +8,7 @@ on:
       - "feature/**"
     paths:
       - "services/**"
+      - ".github/workflows/**"
   pull_request:
     branches:
       - main
@@ -15,6 +16,7 @@ on:
       - "feature/**"  
     paths:
       - "services/**"
+      - ".github/workflows/**"
 
 jobs:
   docker-build:
