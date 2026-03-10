@@ -9,11 +9,12 @@ on:
     paths:
       - "services/**"
       - ".github/workflows/**"
+
   pull_request:
     branches:
       - main
       - "release/**"
-      - "feature/**"  
+      - "feature/**"
     paths:
       - "services/**"
       - ".github/workflows/**"
@@ -21,10 +22,12 @@ on:
 jobs:
   docker-build:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         service: [ApiGateway, UserService, ProductService, CartService, OrderService]
         target: [latest, prod, prod, prod, prod]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -38,7 +41,9 @@ jobs:
       - name: Build Docker image
         run: |
           SERVICE="${{ matrix.service }}"
-          IMAGE_TAG="abodiaa/${SERVICE,,}:${{ github.sha }}"
+          SERVICE_LOWER=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
 
           if [ "$SERVICE" = "ApiGateway" ]; then
             echo "Building $SERVICE without target"
@@ -51,18 +56,26 @@ jobs:
       - name: Push Docker image
         run: |
           SERVICE="${{ matrix.service }}"
-          IMAGE_TAG="abodiaa/${SERVICE,,}:${{ github.sha }}"
+          SERVICE_LOWER=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
+
           docker push $IMAGE_TAG
 
   image-scan:
     needs: docker-build
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         service: [ApiGateway, UserService, ProductService, CartService, OrderService]
-    steps:
-      - name: Scan Docker image
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: abodiaa/${{ matrix.service,, }}:${{ github.sha }}
 
+    steps:
+      - name: Scan Docker image with Trivy
+        run: |
+          SERVICE="${{ matrix.service }}"
+          SERVICE_LOWER=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
+
+          docker run --rm aquasec/trivy image $IMAGE_TAG
