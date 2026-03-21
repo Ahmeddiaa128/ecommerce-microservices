@@ -20,7 +20,7 @@ RUN go get -u ./... && go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api-gateway ./services/ApiGateway/cmd/main.go
 
 # ===== Final Stage =====
-FROM alpine:3.27
+FROM alpine:3.23.3
 
 RUN apk --no-cache add ca-certificates bash
 
