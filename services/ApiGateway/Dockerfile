@@ -1,5 +1,5 @@
 # ===== Build Stage =====
-FROM golang:1.25.3-alpine3.24 AS builder
+FROM golang:1.25.3-alpine3.23 AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN go get -u ./... && go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api-gateway ./services/ApiGateway/cmd/main.go
 
 # ===== Final Stage =====
-FROM alpine:3.24
+FROM alpine:3.23
 
 RUN apk --no-cache add ca-certificates bash
 
