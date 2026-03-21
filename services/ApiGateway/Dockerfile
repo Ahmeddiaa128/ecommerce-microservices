@@ -1,5 +1,5 @@
 # ===== Build Stage =====
-FROM golang:1.25.3-alpine3.23 AS builder
+FROM golang:1.25.7-alpine3.23 AS builder
 
 WORKDIR /app
 
