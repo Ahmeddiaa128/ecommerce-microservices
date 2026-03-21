@@ -22,7 +22,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api-gateway ./ser
 # ===== Final Stage =====
 FROM alpine:3.23.3
 
-RUN apk --no-cache add ca-certificates bash
+# Upgrade all packages to latest stable patch
+RUN apk --no-cache upgrade && apk --no-cache add ca-certificates bash zlib
 
 WORKDIR /root/
 
