@@ -36,5 +36,6 @@ COPY --from=builder /app/services/ApiGateway/config ./config
 # Expose port
 EXPOSE 8080
 
+
 # Run the gateway
 CMD ["./api-gateway"]
