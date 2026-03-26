@@ -1,5 +1,5 @@
 # ---------------- Build Stage ----------------
-FROM golang:1.25.3-alpine AS builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /app
 
 # Copy Go modules and download dependencies
@@ -13,7 +13,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o cartservice ./services/CartService/cmd/main.go
 
 # ---------------- Development Stage ----------------
-FROM golang:1.25.3-alpine AS dev
+FROM golang:1.26-alpine AS dev
 WORKDIR /app
 
 # Install Air for hot reload

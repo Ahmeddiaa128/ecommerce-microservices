@@ -1,0 +1,119 @@
+name: Ecommerce CI/CD Pipeline
+
+# Prevent multiple pipelines running on the same branch simultaneously
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+      - "release/**"
+      - "feature/**"
+    paths:
+      - "services/**"
+      - ".github/workflows/**"
+
+  pull_request:
+    branches:
+      - main
+      - "release/**"
+      - "feature/**"
+    paths:
+      - "services/**"
+      - ".github/workflows/**"
+
+jobs:
+  docker-build:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - service: ApiGateway
+
+          - service: UserService
+            target: prod
+
+          - service: ProductService
+            target: prod
+
+          - service: CartService
+            target: prod
+
+          - service: OrderService
+            target: prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          SERVICE="${{ matrix.service }}"
+          SERVICE_LOWER=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
+
+          if [ -z "${{ matrix.target }}" ]; then
+            echo "Building $SERVICE without target"
+            docker build -f services/$SERVICE/Dockerfile -t $IMAGE_TAG .
+          else
+            echo "Building $SERVICE with target: ${{ matrix.target }}"
+            docker build -f services/$SERVICE/Dockerfile --target ${{ matrix.target }} -t $IMAGE_TAG .
+          fi
+
+      - name: Push Docker image
+        run: |
+          SERVICE="${{ matrix.service }}"
+          SERVICE_LOWER=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
+
+          docker push $IMAGE_TAG
+
+  image-scan:
+    name: Security Scan Docker Images (Trivy)
+    needs: docker-build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [ApiGateway, UserService, ProductService, CartService, OrderService]
+
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Pull Docker image
+        run: |
+          SERVICE="${{ matrix.service }}"
+          SERVICE_LOWER=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
+
+          docker pull $IMAGE_TAG
+
+      - name: Scan Docker image with Trivy
+        run: |
+          SERVICE="${{ matrix.service }}"
+          SERVICE_LOWER=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
+
+          docker run --rm aquasec/trivy:0.69.3 image \
+            --severity CRITICAL,HIGH \
+            --exit-code 1 \
+            $IMAGE_TAG
+

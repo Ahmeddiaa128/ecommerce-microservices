@@ -1,5 +1,5 @@
 # ===== Build Stage =====
-FROM golang:1.25.3-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
@@ -13,13 +13,17 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
+# Update Go dependencies
+RUN go get -u ./... && go mod tidy
+
 # Build the binary
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o api-gateway ./services/ApiGateway/cmd/main.go
 
 # ===== Final Stage =====
-FROM alpine:latest
+FROM alpine:3.23.3
 
-RUN apk --no-cache add ca-certificates bash
+# Upgrade all packages to latest stable patch
+RUN apk --no-cache upgrade && apk --no-cache add ca-certificates bash zlib
 
 WORKDIR /root/
 
@@ -32,6 +36,6 @@ COPY --from=builder /app/services/ApiGateway/config ./config
 # Expose port
 EXPOSE 8080
 
+
 # Run the gateway
 CMD ["./api-gateway"]
-
