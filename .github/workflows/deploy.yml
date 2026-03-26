@@ -112,7 +112,7 @@ jobs:
 
           IMAGE_TAG="abodiaa/$SERVICE_LOWER:${{ github.sha }}"
 
-          docker run --rm aquasec/trivy image \
+          docker run --rm aquasec/trivy:0.69.3 image \
             --severity CRITICAL,HIGH \
             --exit-code 1 \
             $IMAGE_TAG
