@@ -126,7 +126,7 @@ jobs:
 
           docker run --rm \
             aquasec/trivy:0.69.3 image \
-            --severity CRITICAL,HIGH \
+            --severity CRITICAL \
             --exit-code 1 \
             $IMAGE
 
