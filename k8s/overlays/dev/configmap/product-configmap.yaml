@@ -2,17 +2,17 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: productservice-config
-  namespace: ecommerce
+
   labels:
     app: productservice
 
 data:
   GRPC_PORT: "50053"
-  APP_ENV: "production"
+  APP_ENV: "dev"
 
   # Database
   DB_DRIVER: "postgres"
-  DB_HOST: "products-postgres"      # service name
+  DB_HOST: "products-postgres"      
   DB_PORT: "5432"
   DB_MIGRATION_AUTO_RUN: "true"
 
@@ -20,6 +20,4 @@ data:
   REDIS_ENABLED: "true"
   REDIS_HOST: "redis-product"
   REDIS_PORT: "6379"
-
-  # Tracing
 

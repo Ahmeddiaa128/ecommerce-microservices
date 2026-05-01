@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - apigateway-configmap.yaml
+  - user-configmap.yaml
+  - product-configmap.yaml
+  - order-configmap.yaml
+  - cart-configmap.yaml  
+

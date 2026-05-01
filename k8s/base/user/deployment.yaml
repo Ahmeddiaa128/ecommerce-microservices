@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: userservice
-  namespace: ecommerce
   labels:
     app: userservice
     component: backend
@@ -33,7 +32,7 @@ spec:
 
       containers:
         - name: userservice
-          image: abodiaa/userservice:prod
+          image: abodiaa/userservice:PLACEHOLDER
           imagePullPolicy: Always
 
           ports:

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: orderservice
-  namespace: ecommerce
+  
   labels:
     app: orderservice
     component: backend
@@ -32,7 +32,7 @@ spec:
 
       containers:
         - name: orderservice
-          image: abodiaa/orderservice:prod
+          image: abodiaa/orderservice:PLACEHOLDER
           imagePullPolicy: Always
 
           ports:

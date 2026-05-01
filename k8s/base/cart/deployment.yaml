@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cartservice
-  namespace: ecommerce
+
   labels:
     app: cartservice
     component: backend
@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: cartservice
-          image: abodiaa/cartservice:prod
+          image: abodiaa/cartservice:PLACEHOLDER
           imagePullPolicy: Always
           ports:
             - containerPort: 50057

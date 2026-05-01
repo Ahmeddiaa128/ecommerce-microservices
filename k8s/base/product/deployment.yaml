@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: productservice
-  namespace: ecommerce
   labels:
     app: productservice
     component: backend
@@ -25,7 +24,7 @@ spec:
 
       containers:
         - name: productservice
-          image: abodiaa/productservice:prod
+          image: abodiaa/productservice:PLACEHOLDER
           imagePullPolicy: Always
 
           ports:

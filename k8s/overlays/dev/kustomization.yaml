@@ -1,0 +1,75 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ecommerce-dev
+
+resources:
+  - namespace.yaml
+
+  - configmap
+  - secrets
+  - ingress.yaml
+
+  - ../../base/api-gateway
+  - ../../base/user
+  - ../../base/product
+  - ../../base/cart
+  - ../../base/order
+
+images:
+  - name: abodiaa/apigateway
+    newTag: <git-sha>
+  - name: abodiaa/userservice
+    newTag: <git-sha>
+  - name: abodiaa/productservice
+    newTag: <git-sha>
+  - name: abodiaa/cartservice
+    newTag: <git-sha>
+  - name: abodiaa/orderservice
+    newTag: <git-sha>
+
+labels:
+  - pairs:
+      env: dev
+    includeSelectors: true
+
+patches:
+  - target:
+      kind: Deployment
+      name: api-gateway
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  - target:
+      kind: Deployment
+      name: userservice
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  - target:
+      kind: Deployment
+      name: productservice
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  - target:
+      kind: Deployment
+      name: cartservice
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  - target:
+      kind: Deployment
+      name: orderservice
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
